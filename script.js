@@ -1,35 +1,62 @@
-// Get the computer's choice
-const computerChoices = ['rock', 'paper', 'scissors'];
-const getComputerChoice =()=>computerChoices[Math.floor(Math.random() * computerChoices.length)];
+const selectionButtons = document.querySelectorAll('[data-selection]')
+const finalColumn = document.querySelector('[data-final-column]')
+const computerScoreSpan = document.querySelector('[data-computer-score]')
+const yourScoreSpan = document.querySelector('[data-your-score]')
+const SELECTIONS = [
+  {
+    name: 'rock',
+    emoji: '✊',
+    beats: 'scissors'
+  },
+  {
+    name: 'paper',
+    emoji: '✋',
+    beats: 'rock'
+  },
+  {
+    name: 'scissors',
+    emoji: '✌',
+    beats: 'paper'
+  }
+]
 
+selectionButtons.forEach(selectionButton => {
+  selectionButton.addEventListener('click', e => {
+    const selectionName = selectionButton.dataset.selection
+    const selection = SELECTIONS.find(selection => selection.name === selectionName)
+    makeSelection(selection)
+  })
+})
 
-// get the human choice
-const getPlayerChoice = () => {
-    let choice;
-    do {
-        choice = prompt("Choose 'rock', 'paper', or 'scissors'").toLowerCase();
-    } while (!['rock', 'paper', 'scissors'].includes(choice)); // keep asking until valid choice
-    return choice;
-};
+function makeSelection(selection) {
+  const computerSelection = randomSelection()
+  const yourWinner = isWinner(selection, computerSelection)
+  const computerWinner = isWinner(computerSelection, selection)
 
-const computerChoice=getComputerChoice();
-const playerChoice=getPlayerChoice();
-// play a single round
-function playSingleRound(computerChoice,playerChoice){
-    
-    if (computerChoice===playerChoice)
-    {return "It's a tie!"}
-    else if(
-        computerChoice==="rock" && playerChoice==="scissors" ||
-        computerChoice==="paper" && playerChoice==="rock" ||
-        computerChoice==="scissors" && playerChoice==="paper"
-    )
-    {return "Computer wins!"}
-    else
-    {return "You WIN!"}
-};
-const result=playSingleRound(computerChoice,playerChoice)
-console.log(`Computer chose: ${computerChoice}`);
-console.log(`Player chose: ${playerChoice}`);
-console.log(result);
+  addSelectionResult(computerSelection, computerWinner)
+  addSelectionResult(selection, yourWinner)
 
+  if (yourWinner) incrementScore(yourScoreSpan)
+  if (computerWinner) incrementScore(computerScoreSpan)
+}
+
+function incrementScore(scoreSpan) {
+  scoreSpan.innerText = parseInt(scoreSpan.innerText) + 1
+}
+
+function addSelectionResult(selection, winner) {
+  const div = document.createElement('div')
+  div.innerText = selection.emoji
+  div.classList.add('result-selection')
+  if (winner) div.classList.add('winner')
+  finalColumn.after(div)
+}
+
+function isWinner(selection, opponentSelection) {
+  return selection.beats === opponentSelection.name
+}
+
+function randomSelection() {
+  const randomIndex = Math.floor(Math.random() * SELECTIONS.length)
+  return SELECTIONS[randomIndex]
+}
